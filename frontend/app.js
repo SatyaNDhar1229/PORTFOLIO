@@ -1,6 +1,18 @@
 const { useState, useEffect, useMemo } = React;
 const html = htm.bind(React.createElement);
-const CONTACT_API_BASE_URL = window.CONTACT_API_BASE_URL || 'http://localhost:5000';
+function getContactApiBaseUrl() {
+  if (window.CONTACT_API_BASE_URL) {
+    return window.CONTACT_API_BASE_URL;
+  }
+
+  if (window.location.protocol === 'file:') {
+    return 'http://localhost:5000';
+  }
+
+  return window.location.origin;
+}
+
+const CONTACT_API_BASE_URL = getContactApiBaseUrl();
 
 const sectionThemes = {
   hero: {
@@ -164,7 +176,7 @@ function Hero() {
       <div className="hero-orb hero-orb-one"></div>
       <div className="hero-orb hero-orb-two"></div>
       <div className="hero-content" data-reveal>
-        <p className="eyebrow">Full Stack Developer • MERN Specialist • Problem Solver</p>
+        <p className="eyebrow">Full Stack Developer - MERN Specialist - Problem Solver</p>
         <h1>
           <span className="title-line title-line-top">Building bold,</span>
           <span className="title-line title-line-bottom">animated web experiences.</span>
@@ -325,9 +337,13 @@ function Contact() {
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
       console.error('Contact form submission error:', error);
+      const networkErrorMessage = error instanceof TypeError
+        ? 'Contact service is unavailable right now. Start the backend server and open the site from that server, usually at http://localhost:5000.'
+        : (error.message || 'Something went wrong sending the message.');
+
       setStatus({
         type: 'error',
-        message: error.message || 'Something went wrong sending the message.'
+        message: networkErrorMessage
       });
     } finally {
       setIsSubmitting(false);
@@ -395,7 +411,7 @@ function Footer() {
       <div className="social-links" data-reveal>
         ${socialLinks.map(([label, icon, url]) => html`<a key=${label} href=${url} target="_blank" rel="noopener noreferrer" title=${label}><i className=${icon}></i></a>`)}
       </div>
-      <p>© 2024 Satya Narayan Dhar. Designed and built with motion in mind.</p>
+      <p>(c) 2024 Satya Narayan Dhar. Designed and built with motion in mind.</p>
     </footer>
   `;
 }
@@ -511,6 +527,7 @@ window.addEventListener('scroll', () => {
   }
   lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
 }, { passive: true });
+
 
 
 
